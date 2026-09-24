@@ -126,6 +126,25 @@ function htmlToText(raw, limit = 600) {
 }
 function norm(s) { return String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
 function isCritical(text) { const h = norm(text); return CRITICAL_KEYWORDS.some((k) => h.includes(norm(k))); }
+
+// Antecipação e Recuperação são o recorte em que a falta de comentário é crítica.
+function priorityKind(label, projectId) {
+  const id = String(projectId || '');
+  if (id === '297829' || /antecipa/i.test(String(label || ''))) return 'antecipacao';
+  if (id === '303719' || /recupera/i.test(String(label || ''))) return 'recuperacao';
+  return '';
+}
+
+// Gestão da tarefa atrasada = existe comentário humano. Sem comentário = não está em execução.
+function overdueGovernance(bucket, due, comment) {
+  const text = comment && comment.text ? String(comment.text).trim() : '';
+  const human = !!(text && comment && !comment.is_auto);
+  const managed = bucket === 'ATRASADA' && human;
+  return {
+    managed,
+    unmanaged: bucket === 'ATRASADA' && !human,
+  };
+}
 function pickComment(comments) {
   if (!comments.length) return null;
   const ordered = [...comments].sort((a, b) => String(b.creation || b.updated || '').localeCompare(String(a.creation || a.updated || '')));
@@ -175,6 +194,9 @@ async function buildScope(client, scope, today) {
     const last = pickComment(comments[i] || []) || {};
     const text = last.text || '';
     const proj = task.ctcTaskProject || {};
+    const project_label = projectLabel(proj);
+    const project_id = proj.id != null ? String(proj.id) : '';
+    const gov = overdueGovernance(bucket, due, { text, creation: last.creation || '', is_auto: !!last.is_auto });
     const vp = vencParts(due, today, bucket);
     const fallbackCoord = scope.key === 'operacao' ? 'Guilherme Duarte' : '';
     return {
@@ -184,8 +206,9 @@ async function buildScope(client, scope, today) {
       coord: coordFromTitle(task.title, name, fallbackCoord),
       executor: name,
       executor_email: email,
-      project_id: proj.id != null ? String(proj.id) : '',
-      project_label: projectLabel(proj),
+      project_id,
+      project_label,
+      priority: priorityKind(project_label, project_id),
       bucket,
       status_label: label,
       status_css: css,
@@ -196,6 +219,9 @@ async function buildScope(client, scope, today) {
       comment_text: text,
       comment_author: last.author || '',
       comment_date: last.creation || '',
+      comment_is_auto: !!last.is_auto,
+      managed_overdue: gov.managed,
+      unmanaged_overdue: gov.unmanaged,
       is_critical: isCritical(text),
       back_to_you: GUILHERME_EMAILS.has(email),
     };
@@ -203,6 +229,9 @@ async function buildScope(client, scope, today) {
   rows.sort((a, b) => {
     const ca = String(a.coord || '').localeCompare(String(b.coord || ''), 'pt-BR');
     if (ca) return ca;
+    const ua = a.unmanaged_overdue ? (a.priority ? 0 : 1) : 2;
+    const ub = b.unmanaged_overdue ? (b.priority ? 0 : 1) : 2;
+    if (ua !== ub) return ua - ub;
     return a.weight - b.weight || (a.due || '9999').localeCompare(b.due || '9999') || String(a.id).localeCompare(String(b.id));
   });
   return { key: scope.key, titulo: scope.titulo, projects: scopeProjects(scope), rows };
@@ -245,4 +274,6 @@ async function handler(req, res) {
 
 handler.coordFromTitle = coordFromTitle;
 handler.cleanTitle = cleanTitle;
+handler.priorityKind = priorityKind;
+handler.overdueGovernance = overdueGovernance;
 module.exports = handler;

@@ -50,6 +50,7 @@ h1{font-weight:600;font-size:clamp(23px,3.2vw,30px);line-height:1.05;letter-spac
 .stat{font-size:12px;color:var(--muted);display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;}
 .stat b{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-.02em;}
 .stat.s-atr b{color:var(--amber);} .stat.s-hoje b{color:var(--amber-2);}
+.stat.s-gap b{color:#E50914;}
 
 .rail{border:1px solid var(--line);border-radius:14px;background:var(--card);
   padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;box-shadow:0 8px 26px rgba(20,20,20,.05);}
@@ -106,7 +107,7 @@ thead th{border-top:1px solid var(--line);background:var(--wash);font-size:10.5p
   background:#f1f0ec;font-weight:700;text-align:left;letter-spacing:.01em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-td.tit{font-weight:600;} td.tit a{color:#274b8f;text-decoration:none;} td.tit a:hover{text-decoration:underline;}
+td.tit{font-weight:600;} td.tit a{color:#7A0019;text-decoration:none;} td.tit a:hover{text-decoration:underline;}
 td.proj{font-size:11px;} .ptag{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--wash);color:#4a4e56;font-weight:600;}
 td.venc{white-space:nowrap;} .vd{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);} .vh{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;}
 td.status{font-weight:700;white-space:nowrap;}
@@ -119,6 +120,16 @@ td.status{font-weight:700;white-space:nowrap;}
 td.coment .autor{display:block;color:var(--muted);font-size:11px;margin-top:4px;font-family:var(--mono);}
 td.coment.crit{background:var(--amber-soft);box-shadow:inset 3px 0 0 var(--amber-2);}
 td.coment.vazio{color:var(--faint);font-style:italic;}
+td.coment.sem-exec{background:#fde8e6;box-shadow:inset 3px 0 0 #E50914;}
+tr.prio-gap td.coment.sem-exec{background:#f8d0cc;}
+.flag{display:block;margin-bottom:4px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#E50914;}
+.flag.ok{color:var(--green);}
+.task-note{margin:0 0 14px;padding:14px 16px;border:1px solid #f0c4c0;border-radius:12px;background:#fff6f5;color:var(--ink-2);font-size:13.5px;line-height:1.45;}
+.task-note .kicker{display:block;margin-bottom:4px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E50914;}
+.task-note p{margin:0;}
+.task-note .nums{margin-top:8px;font-family:var(--mono);font-size:12.5px;color:var(--ink);}
+.task-note .nums b{font-weight:600;}
+.task-note .nums .gap{color:#E50914;}
 .badge{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:8px;background:var(--wash);color:var(--ink-2);font-size:10px;font-weight:700;border:1px solid var(--line-2);}
 .empty{color:var(--faint);font-style:italic;padding:6px 2px 16px;}
 .foot{margin-top:30px;color:var(--faint);font-size:12px;border-top:1px solid var(--line);padding-top:14px;} .foot b{color:var(--muted);font-weight:600;}
@@ -412,6 +423,7 @@ html.tab-plano .app{max-width:1280px;}
         <span class="barpart" id="barFollow">
           <div class="stats">
             <span class="stat s-atr"><b id="k-atr">–</b> atrasadas</span>
+            <span class="stat s-gap" title="Atrasadas sem comentário posterior ao vencimento"><b id="k-gap">–</b> sem atualização</span>
             <span class="stat s-hoje"><b id="k-hoje">–</b> hoje</span>
             <span class="stat"><b id="k-48">–</b> em 48h</span>
             <span class="stat"><b id="k-tot">–</b> total</span>
@@ -551,6 +563,11 @@ html.tab-plano .app{max-width:1280px;}
   </div>
 
   <div id="viewTarefas">
+    <div class="task-note" id="taskNote" hidden>
+      <span class="kicker">Critério de gestão</span>
+      <p id="taskNoteText"></p>
+      <p class="nums" id="taskNoteNums"></p>
+    </div>
     <div id="status"></div>
     <div id="results"></div>
   </div>
@@ -593,7 +610,7 @@ html.tab-plano .app{max-width:1280px;}
     </div>
   </div>
 
-  <p class="foot">Dados ao vivo do <b>Ekyte</b> (MCP oficial) e do <b>FLOW</b>. <b>Recorte</b> no topo alterna entre toda a gerência Billions e a coordenação do Guilherme (vale para Healthscore, Plano de Ação, Expansão e Sprint Growth). <b>Tarefas</b>: seletores por bloco e Copiar p/ Docs. <b>Adoção</b>: concluídas ÷ (subidas − canceladas), na Gerência e na Operação de cada coordenação. <b>Healthscore</b>: média acumulada de 8 semanas, cortes 17 e 21; <b>TASKS EKYTE</b> = ações abertas cruzadas pelo <b>ticker</b> escrito na tarefa — 0 em vermelho é sem olho na bola. <b>Plano de Ação</b>: o PA da Coordenação no FLOW contra as ações no Ekyte, com prazo. <b>Expansão</b>: cards de Diagnóstico a Follow-up com a task de expansão da coordenação ao lado. <b>Sprint Growth</b>: % das ações que sobem e fecham na mesma sprint, primeiro por coordenação (Gustavo, Guilherme, Nayara) e abaixo por dupla GP/cientista do FLOW. Célula <b>sem subida</b> = nada novo naquela sprint. <b>Atualizar</b> puxa a fonte da aba.</p>
+  <p class="foot">Dados ao vivo do <b>Ekyte</b> (MCP oficial) e do <b>FLOW</b>. <b>Recorte</b> no topo alterna entre toda a gerência Billions e a coordenação do Guilherme (vale para Healthscore, Plano de Ação, Expansão e Sprint Growth). <b>Tarefas</b>: seletores por bloco e Copiar p/ Docs. Tarefa atrasada sem nenhum comentário não está em execução — crítico em Antecipação e Recuperação. <b>Adoção</b>: concluídas ÷ (subidas − canceladas), na Gerência e na Operação de cada coordenação. <b>Healthscore</b>: média acumulada de 8 semanas, cortes 17 e 21; <b>TASKS EKYTE</b> = ações abertas cruzadas pelo <b>ticker</b> escrito na tarefa — 0 em vermelho é sem olho na bola. <b>Plano de Ação</b>: o PA da Coordenação no FLOW contra as ações no Ekyte, com prazo. <b>Expansão</b>: cards de Diagnóstico a Follow-up com a task de expansão da coordenação ao lado. <b>Sprint Growth</b>: % das ações que sobem e fecham na mesma sprint, primeiro por coordenação (Gustavo, Guilherme, Nayara) e abaixo por dupla GP/cientista do FLOW. Célula <b>sem subida</b> = nada novo naquela sprint. <b>Atualizar</b> puxa a fonte da aba.</p>
 </div>
 
 <script>
@@ -718,21 +735,69 @@ function placar(rows){
 }
 function rowHtml(r){
   const badge=r.back_to_you?'<span class="badge">de volta pra você</span>':'';
-  let com; if(!r.comment_text) com='<td class="coment vazio">—</td>';
+  const unmanaged=isUnmanaged(r);
+  const managed=isManaged(r);
+  const prio=isPriority(r);
+  let flag='';
+  if(unmanaged) flag='<span class="flag">'+(prio?'Crítico · ':'')+'Sem atualização · não está em execução</span>';
+  else if(managed&&prio) flag='<span class="flag ok">Sob gestão · comentário registrado</span>';
+  let com;
+  if(!r.comment_text) com='<td class="coment vazio'+(unmanaged?' sem-exec':'')+'">'+flag+'—</td>';
   else{ const meta=r.comment_date?' — '+esc(r.comment_date):''; const a=r.comment_author?'<span class="autor">'+esc(r.comment_author)+meta+'</span>':'';
-    com='<td class="coment'+(r.is_critical?' crit':'')+'" title="'+esc(r.comment_text)+'">'+esc(r.comment_text)+a+'</td>'; }
+    com='<td class="coment'+(unmanaged?' sem-exec':(r.is_critical?' crit':''))+'" title="'+esc(r.comment_text)+'">'+flag+esc(r.comment_text)+a+'</td>'; }
   const vh=r.venc_hint?'<span class="vh">'+esc(r.venc_hint)+'</span>':'';
-  return '<tr>'
+  return '<tr'+(unmanaged&&prio?' class="prio-gap"':'')+'>'
     +'<td class="tit"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+badge+'</td>'
     +'<td class="proj"><span class="ptag">'+esc(r.project_label||'—')+'</span></td>'
     +'<td class="exec">'+esc(r.executor)+'</td>'
     +'<td class="status '+r.status_css+'"><span class="sdot"></span>'+esc(r.status_label)+'</td>'
     +'<td class="venc"><span class="vd">'+esc(r.venc_date)+'</span>'+vh+'</td>'+com+'</tr>';
 }
+const GOV_TEXT = 'As tarefas fora do prazo são acompanhadas pelo comentário. Comentário registrado indica que a ação segue sob gestão. Tarefa atrasada sem nenhum comentário não está sendo executada. Essa condição é crítica e tem prioridade nos projetos de Antecipação (HS ≤ 21) e Recuperação.';
+
+function isPriority(r){ return r.priority==='antecipacao'||r.priority==='recuperacao'||/antecipa|recupera/i.test(r.project_label||''); }
+function isUnmanaged(r){
+  if(r.bucket!=='ATRASADA') return false;
+  return !String(r.comment_text||'').trim()||!!r.comment_is_auto;
+}
+function isManaged(r){
+  return r.bucket==='ATRASADA'&&!isUnmanaged(r);
+}
+function govOf(rows){
+  const late=rows.filter(r=>r.bucket==='ATRASADA');
+  const gap=late.filter(isUnmanaged);
+  const managed=late.filter(isManaged);
+  const ant=gap.filter(r=>r.priority==='antecipacao'||/antecipa/i.test(r.project_label||''));
+  const rec=gap.filter(r=>r.priority==='recuperacao'||/recupera/i.test(r.project_label||''));
+  return {late:late.length, managed:managed.length, gap:gap.length, ant:ant.length, rec:rec.length};
+}
+function govNums(g){
+  if(!g.late) return 'Nenhuma tarefa atrasada nesta visão.';
+  const bits=['<b>'+g.managed+'</b> atrasada(s) sob gestão por comentário', '<b class="gap">'+g.gap+'</b> sem atualização'];
+  bits.push('sendo <b class="gap">'+g.ant+'</b> em Antecipação e <b class="gap">'+g.rec+'</b> em Recuperação');
+  return 'Nesta visão: '+bits.join(' · ')+'.';
+}
+function govPlain(g){
+  if(!g.late) return 'Nenhuma tarefa atrasada nesta visão.';
+  return 'Nesta visão: '+g.managed+' atrasada(s) sob gestão por comentário · '+g.gap+' sem atualização, sendo '+g.ant+' em Antecipação e '+g.rec+' em Recuperação.';
+}
+function paintGov(){
+  const rows=[];
+  if(state.data) for(const sec of shown()) rows.push(...visibleRows(sec));
+  const g=govOf(rows);
+  const note=$('#taskNote');
+  if(!state.data){ note.hidden=true; return g; }
+  note.hidden=false;
+  $('#taskNoteText').textContent=GOV_TEXT;
+  $('#taskNoteNums').innerHTML=govNums(g);
+  const gap=$('#k-gap'); if(gap) gap.textContent=g.gap;
+  return g;
+}
 function updateKPIs(){
   const t={ATRASADA:0,VENCE_HOJE:0,PROXIMAS_48H:0,all:0};
   for(const sec of shown()) for(const r of visibleRows(sec)){ if(r.bucket==='ATRASADA')t.ATRASADA++; else if(r.bucket==='VENCE_HOJE')t.VENCE_HOJE++; else if(r.bucket==='PROXIMAS_48H')t.PROXIMAS_48H++; t.all++; }
   $('#k-atr').textContent=t.ATRASADA; $('#k-hoje').textContent=t.VENCE_HOJE; $('#k-48').textContent=t.PROXIMAS_48H; $('#k-tot').textContent=t.all;
+  paintGov();
 }
 
 // HTML limpo e otimizado pro Google Docs (inline styles, SEM larguras fixas -> Docs auto-dimensiona)
@@ -748,20 +813,28 @@ function docTable(rows){
     const td=(v,x)=>'<td style="border:1px solid #cfcdc7;padding:6px 9px;vertical-align:top;'+(x||'')+'">'+v+'</td>';
     const venc=esc(r.venc_date)+(r.venc_hint?' · '+esc(r.venc_hint):'');
     const aut=r.comment_author?'<div style="color:#8a8a8a;font-size:8pt;margin-top:2px;">'+esc(r.comment_author)+(r.comment_date?' — '+esc(r.comment_date):'')+'</div>':'';
-    const com=r.comment_text?esc(r.comment_text)+aut:'—';
+    const unmanaged=isUnmanaged(r);
+    const prio=isPriority(r);
+    const lead=unmanaged?'<div style="color:#E50914;font-size:8pt;font-weight:bold;margin-bottom:2px;">'+(prio?'CRÍTICO · ':'')+'SEM ATUALIZAÇÃO — NÃO ESTÁ EM EXECUÇÃO</div>':(isManaged(r)&&prio?'<div style="color:#15803d;font-size:8pt;font-weight:bold;margin-bottom:2px;">SOB GESTÃO — COMENTÁRIO REGISTRADO</div>':'');
+    const com=(r.comment_text?esc(r.comment_text)+aut:'—');
+    const bg=unmanaged?(prio?'background:#f8d0cc;':'background:#fde8e6;'):(r.is_critical?'background:#fdf3e3;':'');
     h+='<tr>'
-      +td('<a href="'+esc(r.url)+'" style="color:#1155cc;text-decoration:none;">'+esc(r.title)+'</a>')
+      +td('<a href="'+esc(r.url)+'" style="color:#7A0019;text-decoration:none;">'+esc(r.title)+'</a>')
       +td(esc(r.project_label||'—'))
       +td(esc(r.executor))
       +td('<span style="color:'+(COPY_COLOR[r.bucket]||'#444')+';font-weight:bold;">'+esc(r.status_label)+'</span>')
       +td(venc,'white-space:nowrap;')
-      +td(com, (r.is_critical?'background:#fdf3e3;':'')+'width:42%;');
+      +td(lead+com, bg+'width:42%;');
   }
   return h+'</table>';
 }
 function docHTML(sec){
   const rows=visibleRows(sec);
-  let h='<p style="font-family:Arial,sans-serif;font-size:12pt;font-weight:bold;margin:0 0 6px;">'+esc(sec.titulo)+'</p>';
+  const g=govOf(rows);
+  let h='<p style="font-family:Arial,sans-serif;font-size:10pt;letter-spacing:.08em;text-transform:uppercase;color:#E50914;font-weight:bold;margin:0 0 4px;">Critério de gestão</p>'
+    +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 4px;color:#1a1a1a;">'+esc(GOV_TEXT)+'</p>'
+    +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 12px;color:#1a1a1a;">'+esc(govPlain(g))+'</p>'
+    +'<p style="font-family:Arial,sans-serif;font-size:12pt;font-weight:bold;margin:0 0 6px;">'+esc(sec.titulo)+'</p>';
   if(!rows.length) return h+'<p style="font-family:Arial,sans-serif;font-size:11pt;">Nenhuma tarefa com os filtros atuais.</p>';
   for(const coord of taskCoords(rows)){
     h+='<p style="font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;margin:12px 0 6px;color:#111;">'+esc(coord)+'</p>';
@@ -771,12 +844,13 @@ function docHTML(sec){
 }
 function docPlain(sec){
   const rows=visibleRows(sec);
-  const L=[sec.titulo];
+  const L=['Critério de gestão', GOV_TEXT, govPlain(govOf(rows)), '', sec.titulo];
   if(!rows.length){ L.push('Nenhuma tarefa com os filtros atuais.'); return L.join('\n'); }
   for(const coord of taskCoords(rows)){
     L.push(coord, ['Título','Projeto','Executor','Status','Vencimento','Último comentário'].join('\t'));
     for(const r of rows.filter(x=>(x.coord||'Outros')===coord)){
-      L.push([r.title,r.project_label||'—',r.executor,r.status_label,r.venc_date+(r.venc_hint?' · '+r.venc_hint:''),r.comment_text||'—'].join('\t'));
+      const mark=isUnmanaged(r)?((isPriority(r)?'CRÍTICO · ':'')+'SEM ATUALIZAÇÃO — '):(isManaged(r)&&isPriority(r)?'SOB GESTÃO — ':'');
+      L.push([r.title,r.project_label||'—',r.executor,r.status_label,r.venc_date+(r.venc_hint?' · '+r.venc_hint:''),mark+(r.comment_text||'—')].join('\t'));
     }
     L.push('');
   }
