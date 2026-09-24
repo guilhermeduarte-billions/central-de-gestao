@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ekyte Ação Gerencial"
+  short_description: "Sobe ações gerenciais semanais no Ekyte"
+  default_prompt: "Use $ekyte-acao-gerencial para subir as ações gerenciais da semana no Ekyte a partir das planilhas 5W1H e QC."
+
+policy:
+  allow_implicit_invocation: true

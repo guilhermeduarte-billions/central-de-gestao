@@ -1,0 +1,170 @@
+{
+  "_doc": "Marcas que o time escreve nas tarefas e que não saem da razão social do FLOW nem do nome do workspace no Ekyte. Chave = ticker do FLOW. Só adicionar com evidência (tarefa real onde o nome aparece).",
+  "AICE": [
+    "Frahm"
+  ],
+  "ALQU": [
+    "Alquipharma",
+    "Alquilab"
+  ],
+  "APEQU": [
+    "AP Equip"
+  ],
+  "BRANQ": [
+    "Branquinho"
+  ],
+  "CAR": [
+    "Carflix"
+  ],
+  "CHCI": [
+    "Cape Heating"
+  ],
+  "COMP": [
+    "Compass"
+  ],
+  "CSQM": [
+    "Elysion Spa",
+    "Elysion"
+  ],
+  "CTVS": [
+    "Centro Visão",
+    "Centro Visao"
+  ],
+  "CVSN": [
+    "Encanta",
+    "Criativ Brindes"
+  ],
+  "DCP": [
+    "Days Capital"
+  ],
+  "DDPP2": [
+    "DPV",
+    "D P V"
+  ],
+  "DEIL": [
+    "Durcon"
+  ],
+  "EEAA": [
+    "Emaster"
+  ],
+  "EZTR": [
+    "Ez Turismo",
+    "EZ Turismo"
+  ],
+  "FBNT": [
+    "Fibranet"
+  ],
+  "FIEE": [
+    "Fiberwan"
+  ],
+  "G6S": [
+    "G6 SVA",
+    "G6SVA"
+  ],
+  "GCBB": [
+    "Giacobbo"
+  ],
+  "GIG": [
+    "Gigaclima",
+    "Giga Clima"
+  ],
+  "GIGA": [
+    "Gigaclima",
+    "Giga Clima"
+  ],
+  "GTXQ": [
+    "Getex"
+  ],
+  "HANA": [
+    "Hanaro"
+  ],
+  "IOAM": [
+    "IOA Maringá",
+    "IOA Maringa"
+  ],
+  "JNV": [
+    "Ravi Tecidos",
+    "Ravi"
+  ],
+  "KCE": [
+    "KCE Logistics",
+    "KCE"
+  ],
+  "KRNS": [
+    "Kronos"
+  ],
+  "MAI": [
+    "MaidPad",
+    "Maidpad"
+  ],
+  "MARI": [
+    "Marine Express"
+  ],
+  "MDCR": [
+    "Medicar"
+  ],
+  "MECA": [
+    "Meca"
+  ],
+  "MI5": [
+    "ACMAX",
+    "AcMax"
+  ],
+  "MINU": [
+    "Minussi Home",
+    "Minussi"
+  ],
+  "MTCM": [
+    "Metal Comércio",
+    "Metal Comercio"
+  ],
+  "NORD": [
+    "Nordplast"
+  ],
+  "NUVE": [
+    "Nuveto"
+  ],
+  "NVYK": [
+    "Nova York Você",
+    "Nova York Voce"
+  ],
+  "OTMT": [
+    "Outmat"
+  ],
+  "PGQ": [
+    "PG Química",
+    "PG Quimica"
+  ],
+  "PSM": [
+    "PSM Professional Services"
+  ],
+  "PSTN": [
+    "WK Carpetes",
+    "Wk Carpetes"
+  ],
+  "PTNB": [
+    "Prata Nobre"
+  ],
+  "RDOP": [
+    "RDO Pro"
+  ],
+  "RVSV": [
+    "Reveservice",
+    "Rever Service"
+  ],
+  "SEME": [
+    "Sementes Premix"
+  ],
+  "STUD": [
+    "Studio Henrique Hoffman",
+    "Henrique Hoffman"
+  ],
+  "TSTE": [
+    "TS Teck",
+    "TSTeck"
+  ],
+  "TWAY": [
+    "THE WAY Concierge",
+    "The Way Concierge"
+  ]
+}

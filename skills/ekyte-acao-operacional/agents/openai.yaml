@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ekyte Ação Operacional"
+  short_description: "Sobe ações operacionais da coordenação Guilherme no Ekyte"
+  default_prompt: "Use $ekyte-acao-operacional para subir ações operacionais avulsas no Ekyte para o time da coordenação."
+
+policy:
+  allow_implicit_invocation: true

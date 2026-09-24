@@ -1,0 +1,10 @@
+{
+  "name": "follow-tarefas-ekyte",
+  "private": true,
+  "dependencies": {
+    "@vercel/blob": "^2.0.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}
