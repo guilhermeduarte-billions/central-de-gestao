@@ -68,6 +68,9 @@ function daysBetween(a, b) {
   const [y2, m2, d2] = b.split('-').map(Number);
   return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
 }
+function isNewToday(created, today) {
+  return !!(created && today && created === today);
+}
 function weekday(s) { const [y, m, d] = s.split('-').map(Number); return WD[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]; }
 
 const BUCKETS = {
@@ -188,6 +191,7 @@ async function buildScope(client, scope, today) {
   const rows = tasks.map((task, i) => {
     const situation = String(task.situation);
     const due = parseDate(task.currentDueDate || task.phaseDueDate);
+    const created = parseDate(task.createdAt || task.creationDate);
     const bucket = classify(due, situation, today);
     const [label, css] = BUCKETS[bucket];
     const { name, email } = executorOf(task);
@@ -214,6 +218,8 @@ async function buildScope(client, scope, today) {
       status_css: css,
       weight: BUCKETS[bucket][2],
       due,
+      created,
+      is_new: isNewToday(created, today),
       venc_date: vp.date,
       venc_hint: vp.hint,
       comment_text: text,
@@ -265,7 +271,7 @@ async function handler(req, res) {
     const sections = [];
     for (const scope of SCOPES) sections.push(await buildScope(client, scope, today));
     return res.status(200).send(JSON.stringify({
-      ok: true, generated_at: nowLabel(), week_label: weekLabel(), sections,
+      ok: true, generated_at: nowLabel(), today, week_label: weekLabel(), sections,
     }));
   } catch (err) {
     return res.status(500).send(JSON.stringify({ ok: false, error: String((err && err.message) || err) }));
@@ -276,4 +282,5 @@ handler.coordFromTitle = coordFromTitle;
 handler.cleanTitle = cleanTitle;
 handler.priorityKind = priorityKind;
 handler.overdueGovernance = overdueGovernance;
+handler.isNewToday = isNewToday;
 module.exports = handler;

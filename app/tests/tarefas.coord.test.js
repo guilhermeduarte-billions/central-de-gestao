@@ -35,7 +35,7 @@ assert.strictEqual(
   'PA robusto Giacobbo',
 );
 
-const { priorityKind, overdueGovernance } = require('../api/data.js');
+const { priorityKind, overdueGovernance, isNewToday } = require('../api/data.js');
 assert.strictEqual(priorityKind('Antecipação HS ≤21', '297829'), 'antecipacao');
 assert.strictEqual(priorityKind('Recuperação', '303719'), 'recuperacao');
 assert.strictEqual(priorityKind('Expansão', '305096'), '');
@@ -61,5 +61,9 @@ assert.deepStrictEqual(
   overdueGovernance('EM_ANDAMENTO', '2026-09-30', { text: '', creation: '', is_auto: false }),
   { managed: false, unmanaged: false },
 );
+
+assert.strictEqual(isNewToday('2026-09-24', '2026-09-24'), true);
+assert.strictEqual(isNewToday('2026-09-23', '2026-09-24'), false);
+assert.strictEqual(isNewToday('', '2026-09-24'), false);
 
 console.log('tarefas.coord.test.js ok');

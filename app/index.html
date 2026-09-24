@@ -65,8 +65,9 @@ h1{font-weight:600;font-size:clamp(23px,3.2vw,30px);line-height:1.05;letter-spac
 @keyframes sp{to{transform:rotate(360deg)}}
 #status{min-height:15px;margin:-10px 2px 16px;color:var(--muted);font-size:12.5px;} #status.err{color:var(--amber);}
 
-section.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 6px;margin-bottom:18px;
+section.card{position:relative;z-index:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 6px;margin-bottom:18px;
   box-shadow:0 10px 30px rgba(20,20,20,.04);animation:rise .45s cubic-bezier(.2,.7,.2,1) both;}
+section.card:has(.dd[open]){z-index:12;}
 section.card:nth-child(2){animation-delay:.05s} section.card:nth-child(3){animation-delay:.1s}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .chead{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
@@ -74,6 +75,8 @@ section.card:nth-child(2){animation-delay:.05s} section.card:nth-child(3){animat
 .placar{color:var(--muted);font-size:12.5px;font-family:var(--mono);} .placar b{color:var(--ink);font-weight:600;}
 .ctools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;}
 .ctools .copy{margin-left:auto;}
+.ctools .copy-set{margin-left:auto;display:inline-flex;gap:8px;flex-wrap:wrap;}
+.ctools .copy-set .copy{margin-left:0;}
 
 /* dropdowns (details) */
 .dd{position:relative;}
@@ -88,6 +91,7 @@ section.card:nth-child(2){animation-delay:.05s} section.card:nth-child(3){animat
 .menu-act{display:flex;gap:6px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;}
 .menu-act button{flex:1;border:1px solid var(--line-2);background:var(--card);border-radius:7px;padding:5px 8px;font-size:11.5px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:var(--sans);}
 .menu-act button:hover{border-color:var(--accent);color:var(--ink);}
+.menu-act button:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
 .menu label{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px;}
 .menu label:hover{background:var(--wash);}
 .menu label input{margin:0;width:15px;height:15px;accent-color:var(--accent);}
@@ -131,6 +135,8 @@ tr.prio-gap td.coment.sem-exec{background:#f8d0cc;}
 .task-note .nums b{font-weight:600;}
 .task-note .nums .gap{color:#E50914;}
 .badge{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:8px;background:var(--wash);color:var(--ink-2);font-size:10px;font-weight:700;border:1px solid var(--line-2);}
+.badge.nova{margin-left:0;margin-right:6px;padding:0 6px;background:#eef6ee;color:var(--green);border-color:#c9e4c9;letter-spacing:.04em;text-transform:uppercase;vertical-align:1px;}
+.stat.s-nova b{color:var(--green);}
 .empty{color:var(--faint);font-style:italic;padding:6px 2px 16px;}
 .foot{margin-top:30px;color:var(--faint);font-size:12px;border-top:1px solid var(--line);padding-top:14px;} .foot b{color:var(--muted);font-weight:600;}
 
@@ -423,7 +429,8 @@ html.tab-plano .app{max-width:1280px;}
         <span class="barpart" id="barFollow">
           <div class="stats">
             <span class="stat s-atr"><b id="k-atr">–</b> atrasadas</span>
-            <span class="stat s-gap" title="Atrasadas sem comentário posterior ao vencimento"><b id="k-gap">–</b> sem atualização</span>
+            <span class="stat s-gap" title="Atrasadas sem comentário"><b id="k-gap">–</b> sem atualização</span>
+            <span class="stat s-nova" title="Tarefas criadas hoje no Ekyte"><b id="k-nova">–</b> subidas hoje</span>
             <span class="stat s-hoje"><b id="k-hoje">–</b> hoje</span>
             <span class="stat"><b id="k-48">–</b> em 48h</span>
             <span class="stat"><b id="k-tot">–</b> total</span>
@@ -693,7 +700,10 @@ function buildCards(){
       +'<div class="ctools">'
         +(projs.length>1?'<details class="dd" data-kind="proj"><summary>'+ddSummary('Projeto',f.proj.size,projs.length)+'</summary>'+ddMenu('proj',sec,projs,it=>it.id,f.proj)+'</details>':'')
         +'<details class="dd" data-kind="person"><summary>'+ddSummary('Pessoa',f.person.size,people.length)+'</summary>'+ddMenu('person',sec,people,it=>it.name,f.person)+'</details>'
-        +'<button class="btn ghost copy">⧉ Copiar p/ Docs</button>'
+        +'<span class="copy-set">'
+          +'<button class="btn ghost copy" data-disc="0" title="Só a tabela, para colar de novo no mesmo documento">⧉ Copiar</button>'
+          +'<button class="btn ghost copy" data-disc="1" title="Tabela com o critério de gestão no topo">⧉ Com critério</button>'
+        +'</span>'
       +'</div><div class="tbl"></div>';
     box.appendChild(card);
     renderTable(sec);
@@ -728,12 +738,14 @@ function renderTable(sec){
 
 function placar(rows){
   const c={ATRASADA:0,VENCE_HOJE:0,PROXIMAS_48H:0,EM_ANDAMENTO:0,PAUSADA:0,SEM_PRAZO:0}; rows.forEach(r=>c[r.bucket]++);
-  const p=[]; if(c.ATRASADA)p.push('<b>'+c.ATRASADA+'</b> atrasada(s)'); if(c.VENCE_HOJE)p.push('<b>'+c.VENCE_HOJE+'</b> hoje');
+  const p=[]; const novas=rows.filter(isNew).length; if(novas) p.push('<b>'+novas+'</b> subida(s) hoje');
+  if(c.ATRASADA)p.push('<b>'+c.ATRASADA+'</b> atrasada(s)'); if(c.VENCE_HOJE)p.push('<b>'+c.VENCE_HOJE+'</b> hoje');
   if(c.PROXIMAS_48H)p.push('<b>'+c.PROXIMAS_48H+'</b> em 48h'); if(c.EM_ANDAMENTO)p.push('<b>'+c.EM_ANDAMENTO+'</b> no prazo');
   if(c.PAUSADA)p.push('<b>'+c.PAUSADA+'</b> pausada(s)'); if(c.SEM_PRAZO)p.push('<b>'+c.SEM_PRAZO+'</b> sem prazo');
   p.push('<b>'+rows.length+'</b> total'); return p.join(' · ');
 }
 function rowHtml(r){
+  const nova=isNew(r)?'<span class="badge nova" title="Subida hoje">nova</span>':'';
   const badge=r.back_to_you?'<span class="badge">de volta pra você</span>':'';
   const unmanaged=isUnmanaged(r);
   const managed=isManaged(r);
@@ -747,7 +759,7 @@ function rowHtml(r){
     com='<td class="coment'+(unmanaged?' sem-exec':(r.is_critical?' crit':''))+'" title="'+esc(r.comment_text)+'">'+flag+esc(r.comment_text)+a+'</td>'; }
   const vh=r.venc_hint?'<span class="vh">'+esc(r.venc_hint)+'</span>':'';
   return '<tr'+(unmanaged&&prio?' class="prio-gap"':'')+'>'
-    +'<td class="tit"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+badge+'</td>'
+    +'<td class="tit">'+nova+'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+badge+'</td>'
     +'<td class="proj"><span class="ptag">'+esc(r.project_label||'—')+'</span></td>'
     +'<td class="exec">'+esc(r.executor)+'</td>'
     +'<td class="status '+r.status_css+'"><span class="sdot"></span>'+esc(r.status_label)+'</td>'
@@ -755,6 +767,11 @@ function rowHtml(r){
 }
 const GOV_TEXT = 'As tarefas fora do prazo são acompanhadas pelo comentário. Comentário registrado indica que a ação segue sob gestão. Tarefa atrasada sem nenhum comentário não está sendo executada. Essa condição é crítica e tem prioridade nos projetos de Antecipação (HS ≤ 21) e Recuperação.';
 
+function isNew(r){
+  if(typeof r.is_new==='boolean') return r.is_new;
+  const today=state.data&&state.data.today;
+  return !!(r.created&&today&&r.created===today);
+}
 function isPriority(r){ return r.priority==='antecipacao'||r.priority==='recuperacao'||/antecipa|recupera/i.test(r.project_label||''); }
 function isUnmanaged(r){
   if(r.bucket!=='ATRASADA') return false;
@@ -794,9 +811,9 @@ function paintGov(){
   return g;
 }
 function updateKPIs(){
-  const t={ATRASADA:0,VENCE_HOJE:0,PROXIMAS_48H:0,all:0};
-  for(const sec of shown()) for(const r of visibleRows(sec)){ if(r.bucket==='ATRASADA')t.ATRASADA++; else if(r.bucket==='VENCE_HOJE')t.VENCE_HOJE++; else if(r.bucket==='PROXIMAS_48H')t.PROXIMAS_48H++; t.all++; }
-  $('#k-atr').textContent=t.ATRASADA; $('#k-hoje').textContent=t.VENCE_HOJE; $('#k-48').textContent=t.PROXIMAS_48H; $('#k-tot').textContent=t.all;
+  const t={ATRASADA:0,VENCE_HOJE:0,PROXIMAS_48H:0,all:0,nova:0};
+  for(const sec of shown()) for(const r of visibleRows(sec)){ if(r.bucket==='ATRASADA')t.ATRASADA++; else if(r.bucket==='VENCE_HOJE')t.VENCE_HOJE++; else if(r.bucket==='PROXIMAS_48H')t.PROXIMAS_48H++; if(isNew(r)) t.nova++; t.all++; }
+  $('#k-atr').textContent=t.ATRASADA; $('#k-nova').textContent=t.nova; $('#k-hoje').textContent=t.VENCE_HOJE; $('#k-48').textContent=t.PROXIMAS_48H; $('#k-tot').textContent=t.all;
   paintGov();
 }
 
@@ -818,8 +835,9 @@ function docTable(rows){
     const lead=unmanaged?'<div style="color:#E50914;font-size:8pt;font-weight:bold;margin-bottom:2px;">'+(prio?'CRÍTICO · ':'')+'SEM ATUALIZAÇÃO — NÃO ESTÁ EM EXECUÇÃO</div>':(isManaged(r)&&prio?'<div style="color:#15803d;font-size:8pt;font-weight:bold;margin-bottom:2px;">SOB GESTÃO — COMENTÁRIO REGISTRADO</div>':'');
     const com=(r.comment_text?esc(r.comment_text)+aut:'—');
     const bg=unmanaged?(prio?'background:#f8d0cc;':'background:#fde8e6;'):(r.is_critical?'background:#fdf3e3;':'');
+    const nova=isNew(r)?'<span style="color:#15803d;font-size:8pt;font-weight:bold;letter-spacing:.04em;">NOVA · </span>':'';
     h+='<tr>'
-      +td('<a href="'+esc(r.url)+'" style="color:#7A0019;text-decoration:none;">'+esc(r.title)+'</a>')
+      +td(nova+'<a href="'+esc(r.url)+'" style="color:#7A0019;text-decoration:none;">'+esc(r.title)+'</a>')
       +td(esc(r.project_label||'—'))
       +td(esc(r.executor))
       +td('<span style="color:'+(COPY_COLOR[r.bucket]||'#444')+';font-weight:bold;">'+esc(r.status_label)+'</span>')
@@ -828,13 +846,15 @@ function docTable(rows){
   }
   return h+'</table>';
 }
-function docHTML(sec){
+function docHTML(sec, withDisc){
   const rows=visibleRows(sec);
   const g=govOf(rows);
-  let h='<p style="font-family:Arial,sans-serif;font-size:10pt;letter-spacing:.08em;text-transform:uppercase;color:#E50914;font-weight:bold;margin:0 0 4px;">Critério de gestão</p>'
-    +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 4px;color:#1a1a1a;">'+esc(GOV_TEXT)+'</p>'
-    +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 12px;color:#1a1a1a;">'+esc(govPlain(g))+'</p>'
-    +'<p style="font-family:Arial,sans-serif;font-size:12pt;font-weight:bold;margin:0 0 6px;">'+esc(sec.titulo)+'</p>';
+  let h=withDisc
+    ?('<p style="font-family:Arial,sans-serif;font-size:10pt;letter-spacing:.08em;text-transform:uppercase;color:#E50914;font-weight:bold;margin:0 0 4px;">Critério de gestão</p>'
+      +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 4px;color:#1a1a1a;">'+esc(GOV_TEXT)+'</p>'
+      +'<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 12px;color:#1a1a1a;">'+esc(govPlain(g))+'</p>')
+    :'';
+  h+='<p style="font-family:Arial,sans-serif;font-size:12pt;font-weight:bold;margin:0 0 6px;">'+esc(sec.titulo)+'</p>';
   if(!rows.length) return h+'<p style="font-family:Arial,sans-serif;font-size:11pt;">Nenhuma tarefa com os filtros atuais.</p>';
   for(const coord of taskCoords(rows)){
     h+='<p style="font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;margin:12px 0 6px;color:#111;">'+esc(coord)+'</p>';
@@ -842,14 +862,14 @@ function docHTML(sec){
   }
   return h;
 }
-function docPlain(sec){
+function docPlain(sec, withDisc){
   const rows=visibleRows(sec);
-  const L=['Critério de gestão', GOV_TEXT, govPlain(govOf(rows)), '', sec.titulo];
+  const L=withDisc?['Critério de gestão', GOV_TEXT, govPlain(govOf(rows)), '', sec.titulo]:[sec.titulo];
   if(!rows.length){ L.push('Nenhuma tarefa com os filtros atuais.'); return L.join('\n'); }
   for(const coord of taskCoords(rows)){
     L.push(coord, ['Título','Projeto','Executor','Status','Vencimento','Último comentário'].join('\t'));
     for(const r of rows.filter(x=>(x.coord||'Outros')===coord)){
-      const mark=isUnmanaged(r)?((isPriority(r)?'CRÍTICO · ':'')+'SEM ATUALIZAÇÃO — '):(isManaged(r)&&isPriority(r)?'SOB GESTÃO — ':'');
+      const mark=(isNew(r)?'NOVA · ':'')+(isUnmanaged(r)?((isPriority(r)?'CRÍTICO · ':'')+'SEM ATUALIZAÇÃO — '):(isManaged(r)&&isPriority(r)?'SOB GESTÃO — ':''));
       L.push([r.title,r.project_label||'—',r.executor,r.status_label,r.venc_date+(r.venc_hint?' · '+r.venc_hint:''),mark+(r.comment_text||'—')].join('\t'));
     }
     L.push('');
@@ -871,10 +891,10 @@ async function copyRich(html, plain, btn){
   }
   btn.textContent=ok?'✓ Copiado':'Erro ao copiar'; setTimeout(()=>btn.innerHTML=t,1500);
 }
-async function copyBlock(card){
-  const sec=byKey[card.dataset.key]; if(!sec) return;
-  const b=card.querySelector('.copy'); if(!b) return;
-  await copyRich(docHTML(sec), docPlain(sec), b);
+async function copyBlock(card, btn){
+  const sec=byKey[card.dataset.key]; if(!sec||!btn) return;
+  const withDisc=btn.dataset.disc==='1';
+  await copyRich(docHTML(sec, withDisc), docPlain(sec, withDisc), btn);
 }
 
 // eventos
@@ -2451,7 +2471,7 @@ $('#results').addEventListener('click',e=>{
     const kind=a.startsWith('proj')?'proj':'person';
     card.querySelectorAll('.dd[data-kind="'+(kind==='proj'?'proj':'person')+'"] input[type=checkbox]').forEach(cb=>{ const id=cb.dataset[kind]; cb.checked=(kind==='proj'?f.proj:f.person).has(id); });
     renderTable(sec); updateKPIs(); return; }
-  const cp=e.target.closest('.copy'); if(cp){ copyBlock(cp.closest('section[data-key]')); }
+  const cp=e.target.closest('.copy'); if(cp){ copyBlock(cp.closest('section[data-key]'), cp); }
 });
 
 // só um dropdown aberto por vez + fechar ao clicar fora
